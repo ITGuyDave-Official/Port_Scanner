@@ -1,3 +1,4 @@
+
 import socket
 
 # Function to scan a port on a target host
@@ -10,8 +11,10 @@ def scan_port(host, port):
     try:
         sock.connect((host, port))
         sock.shutdown(socket.SHUT_RDWR)
+        print(f"Port {port} open.")
         return True
     except:
+        print(f"Port {port} closed.")
         return False
     finally:
         sock.close()
