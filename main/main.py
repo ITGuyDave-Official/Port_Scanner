@@ -1,8 +1,8 @@
-
 import socket
+import threading
 
 # Function to scan a port on a target host
-def scan_port(host, port):
+def scan_port(host, port, open_ports):
     # Create a socket object
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(1)
@@ -12,24 +12,27 @@ def scan_port(host, port):
         sock.connect((host, port))
         sock.shutdown(socket.SHUT_RDWR)
         print(f"Port {port} open.")
-        return True
+        open_ports.append(port)
     except:
         print(f"Port {port} closed.")
-        return False
     finally:
         sock.close()
 
-# Function to scan a range of ports on a target host
+# Function to scan a range of ports on a target host using multithreading
 def scan_range(host, start_port, end_port):
-    # Initialize list of open ports
     open_ports = []
+    threads = []
 
-    # Scan each port in the range
-    for port in range(start_port, end_port+1):
-        if scan_port(host, port):
-            open_ports.append(port)
+    for port in range(start_port, end_port + 1):
+        # Create a thread for each port
+        thread = threading.Thread(target=scan_port, args=(host, port, open_ports))
+        threads.append(thread)
+        thread.start()
 
-    # Return list of open ports
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
     return open_ports
 
 # Main function to get user input and call scan_range function
